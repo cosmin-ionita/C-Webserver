@@ -15,28 +15,9 @@
 #define SORRY 43
 #define LOG   44
 
-struct {
-	char *ext;
-	char *filetype;
-} extensions [] = {
-	{"gif", "image/gif" },
-	{"jpg", "image/jpeg"},
-	{"jpeg","image/jpeg"},
-	{"png", "image/png" },
-	{"zip", "image/zip" },
-	{"gz",  "image/gz"  },
-	{"tar", "image/tar" },
-	{"htm", "text/html" },
-	{"html","text/html" },
-	{"php", "image/php" },
-	{"cgi", "text/cgi"  },
-	{"asp","text/asp"   },
-	{"jsp", "image/jsp" },
-	{"xml", "text/xml"  },
-	{"js","text/js"     },
-   {"css","test/css"   },
+#define LOAD_SIZE 10
 
-	{0,0} };
+// This is simple logging, I think that we'll throw it in the near future
 
 void log(int type, char *s1, char *s2, int num)
 {
@@ -68,6 +49,8 @@ void web(int fd, int hit)
 	char * fstr;
 	static char buffer[BUFSIZE+1];
 
+	// In this first part, it reads the request that was received from the client
+
 	ret =read(fd,buffer,BUFSIZE);
 	if(ret == 0 || ret == -1) {
 		log(SORRY,"failed to read browser request","",fd);
@@ -84,48 +67,27 @@ void web(int fd, int hit)
 	if( strncmp(buffer,"GET ",4) && strncmp(buffer,"get ",4) )
 		log(SORRY,"Only simple GET operation supported",buffer,fd);
 
-	for(i=4;i<BUFSIZE;i++) {
-		if(buffer[i] == ' ') {
-			buffer[i] = 0;
-			break;
-		}
+	// We induce a load here (simulate hard processing)
+
+	int it = 0;
+
+	while(it < LOAD_SIZE)
+	{
+			it++;
+			sleep(1);	// Here we sleep for 1 second! (that's why we'll choose a pretty small Load Size)
 	}
 
-	for(j=0;j<i-1;j++)
-		if(buffer[j] == '.' && buffer[j+1] == '.')
-			log(SORRY,"Parent directory (..) path names not supported",buffer,fd);
-
-	if( !strncmp(&buffer[0],"GET /\0",6) || !strncmp(&buffer[0],"get /\0",6) )
-		(void)strcpy(buffer,"GET /index.html");
-
-	buflen=strlen(buffer);
-	fstr = (char *)0;
-	for(i=0;extensions[i].ext != 0;i++) {
-		len = strlen(extensions[i].ext);
-		if( !strncmp(&buffer[buflen-len], extensions[i].ext, len)) {
-			fstr =extensions[i].filetype;
-			break;
-		}
-	}
-	if(fstr == 0) log(SORRY,"file extension type not supported",buffer,fd);
-
-	if(( file_fd = open(&buffer[5],O_RDONLY)) == -1)
-		log(SORRY, "failed to open file",&buffer[5],fd);
-
-	log(LOG,"SEND",&buffer[5],hit);
+	// Sends the 200 response back to the client
 
 	(void)sprintf(buffer,"HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fstr);
 	(void)write(fd,buffer,strlen(buffer));
 
-	while (	(ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
-		(void)write(fd,buffer,ret);
-	}
+
 #ifdef LINUX
 	sleep(1);
 #endif
 	exit(1);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -134,28 +96,8 @@ int main(int argc, char **argv)
 	static struct sockaddr_in cli_addr;
 	static struct sockaddr_in serv_addr;
 
-	if( argc < 3  || argc > 3 || !strcmp(argv[1], "-?") ) {
-		(void)printf("usage: server [port] [server directory] &"
-	"\tExample: server 80 ./ &\n\n"
-	"\tOnly Supports:");
-		for(i=0;extensions[i].ext != 0;i++)
-			(void)printf(" %s",extensions[i].ext);
 
-		(void)printf("\n\tNot Supported: directories / /etc /bin /lib /tmp /usr /dev /sbin \n"
-		    );
-		exit(0);
-	}
-	if( !strncmp(argv[2],"/"   ,2 ) || !strncmp(argv[2],"/etc", 5 ) ||
-	    !strncmp(argv[2],"/bin",5 ) || !strncmp(argv[2],"/lib", 5 ) ||
-	    !strncmp(argv[2],"/tmp",5 ) || !strncmp(argv[2],"/usr", 5 ) ||
-	    !strncmp(argv[2],"/dev",5 ) || !strncmp(argv[2],"/sbin",6) ){
-		(void)printf("ERROR: Bad top directory %s, see server -?\n",argv[2]);
-		exit(3);
-	}
-	if(chdir(argv[2]) == -1){
-		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
-		exit(4);
-	}
+	// Handle the request (create new process and do the job on it)
 
 	if(fork() != 0)
 		return 0;
