@@ -1,4 +1,8 @@
-for run in {1..100}
+#! /bin/bash
+trap "pkill -P $$; kill -INT $$" INT
+
+while read n
 do
-	./client
-done
+    "$@" &
+done < <(seq 1000)
+wait
