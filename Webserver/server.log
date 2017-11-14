@@ -70,3 +70,7 @@
  INFO: request:GET / HTTP/1.1**Host: localhost:8080**Accept: */***Accept-Encoding: gzip**User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/3.0.8**Connection: close****:38
  INFO: request:GET / HTTP/1.1**Host: localhost:8080**Accept: */***Accept-Encoding: gzip**User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/3.0.8**Connection: close****:39
  INFO: request:GET / HTTP/1.1**Host: localhost:8080**Accept: */***Accept-Encoding: gzip**User-Agent: Mozilla/5.0 (pc-x86_64-linux-gnu) Siege/3.0.8**Connection: close****:40
+ INFO: http server starting:(null):1107
+ INFO: http server starting:(null):1155
+ INFO: http server starting:(null):1161
+ INFO: http server starting:(null):1185
