@@ -97,7 +97,6 @@ void web(int fd, int hit)
 	
 	// verify by the workload type
 	printf("Am primit: %s\n", buffer);
-        fflush(stdout);
 		
 
 	// We induce a load here (simulate hard processing)

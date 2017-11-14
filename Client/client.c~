@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 	    char str[6];
 	    sprintf(str, "%d", matrixSize);
 	
-		//ceva cu snprintf sa adaug workType si workValue (sa se actualizeze request_len)	    
+		//ceva cu snprintf	    
 
 	    while (nbytes_total < request_len) {
 		nbytes_last = write(socket_file_descriptor, request + nbytes_total, request_len - nbytes_total);
